@@ -553,34 +553,6 @@ describe("modelsListCommand forward-compat", () => {
       expect(codexMini?.tags).not.toContain("missing");
     });
 
-    it("does not mark configured codex gpt-5.4-pro as missing when forward-compat can build a fallback", async () => {
-      mocks.resolveConfiguredEntries.mockReturnValueOnce({
-        entries: [
-          {
-            key: "openai-codex/gpt-5.4-pro",
-            ref: { provider: "openai-codex", model: "gpt-5.4-pro" },
-            tags: new Set(["configured"]),
-            aliases: [],
-          },
-        ],
-      });
-      const runtime = createRuntime();
-
-      await modelsListCommand({ json: true }, runtime as never);
-
-      expect(mocks.printModelTable).toHaveBeenCalled();
-      const rows = lastPrintedRows<{
-        key: string;
-        tags: string[];
-        missing: boolean;
-      }>();
-
-      const codexPro = rows.find((row) => row.key === "openai-codex/gpt-5.4-pro");
-      expect(codexPro).toBeTruthy();
-      expect(codexPro?.missing).toBe(false);
-      expect(codexPro?.tags).not.toContain("missing");
-    });
-
     it("does not load the model registry for configured-mode listing", async () => {
       const runtime = createRuntime();
 

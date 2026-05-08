@@ -4,6 +4,8 @@ import { validateConfigObjectWithPlugins } from "./validation.js";
 
 const staleOpenAICodexReason =
   "is no longer supported for ChatGPT/Codex OAuth accounts. Use openai/gpt-5.5 through the Codex runtime.";
+const unsupportedOpenAICodexProReason =
+  "is not supported for ChatGPT/Codex OAuth accounts. Use openai/gpt-5.5 through the Codex runtime, or use";
 
 function createModelSuppressionRegistry(): PluginManifestRegistry {
   return {
@@ -38,6 +40,18 @@ function createModelSuppressionRegistry(): PluginManifestRegistry {
               provider: "openai-codex",
               model: "gpt-5.3-codex",
               reason: `gpt-5.3-codex ${staleOpenAICodexReason}`,
+            },
+            {
+              provider: "openai-codex",
+              model: "gpt-5.4-pro",
+              reason:
+                "gpt-5.4-pro is not supported for ChatGPT/Codex OAuth accounts. Use openai/gpt-5.5 through the Codex runtime, or use openai/gpt-5.4-pro with OpenAI API-key routing if your account has access.",
+            },
+            {
+              provider: "openai-codex",
+              model: "gpt-5.5-pro",
+              reason:
+                "gpt-5.5-pro is not supported for ChatGPT/Codex OAuth accounts. Use openai/gpt-5.5 through the Codex runtime, or use openai/gpt-5.5-pro with OpenAI API-key routing if your account has access.",
             },
           ],
         },
@@ -130,5 +144,42 @@ describe("config model reference validation", () => {
       message:
         "Unknown model: openai-codex/gpt-5.3-codex. gpt-5.3-codex is no longer supported for ChatGPT/Codex OAuth accounts. Use openai/gpt-5.5 through the Codex runtime.",
     });
+  });
+
+  it("rejects openai-codex Pro refs that require a non-OAuth route", () => {
+    const res = validateConfigObjectWithPlugins(
+      {
+        agents: {
+          defaults: {
+            model: {
+              primary: "openai-codex/gpt-5.4-pro",
+              fallbacks: ["openai-codex/gpt-5.5-pro"],
+            },
+          },
+        },
+      },
+      {
+        pluginMetadataSnapshot: {
+          manifestRegistry: createModelSuppressionRegistry(),
+        },
+      },
+    );
+
+    expect(res.ok).toBe(false);
+    if (res.ok) {
+      return;
+    }
+    expect(res.issues).toContainEqual(
+      expect.objectContaining({
+        path: "agents.defaults.model.primary",
+        message: expect.stringContaining(unsupportedOpenAICodexProReason),
+      }),
+    );
+    expect(res.issues).toContainEqual(
+      expect.objectContaining({
+        path: "agents.defaults.model.fallbacks.0",
+        message: expect.stringContaining(unsupportedOpenAICodexProReason),
+      }),
+    );
   });
 });

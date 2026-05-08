@@ -51,35 +51,19 @@ const OPENAI_CODEX_BASE_URL = OPENAI_CODEX_RESPONSES_BASE_URL;
 const OPENAI_CODEX_LOGIN_ASSISTANT_PRIORITY = -30;
 const OPENAI_CODEX_DEVICE_PAIRING_ASSISTANT_PRIORITY = -10;
 const OPENAI_CODEX_GPT_55_MODEL_ID = "gpt-5.5";
-const OPENAI_CODEX_GPT_55_PRO_MODEL_ID = "gpt-5.5-pro";
 const OPENAI_CODEX_GPT_54_MODEL_ID = "gpt-5.4";
 const OPENAI_CODEX_GPT_54_LEGACY_MODEL_ID = "gpt-5.4-codex";
 const OPENAI_CODEX_GPT_54_MINI_MODEL_ID = "gpt-5.4-mini";
-const OPENAI_CODEX_GPT_54_PRO_MODEL_ID = "gpt-5.4-pro";
 const OPENAI_CODEX_GPT_55_CODEX_CONTEXT_TOKENS = 400_000;
 const OPENAI_CODEX_GPT_55_DEFAULT_RUNTIME_CONTEXT_TOKENS = 272_000;
-const OPENAI_CODEX_GPT_55_PRO_NATIVE_CONTEXT_TOKENS = 1_000_000;
-const OPENAI_CODEX_GPT_55_PRO_DEFAULT_CONTEXT_TOKENS = 272_000;
 const OPENAI_CODEX_GPT_54_NATIVE_CONTEXT_TOKENS = 1_050_000;
 const OPENAI_CODEX_GPT_54_DEFAULT_CONTEXT_TOKENS = 272_000;
 const OPENAI_CODEX_GPT_54_MINI_NATIVE_CONTEXT_TOKENS = 400_000;
 const OPENAI_CODEX_GPT_54_MAX_TOKENS = 128_000;
-const OPENAI_CODEX_GPT_55_PRO_COST = {
-  input: 30,
-  output: 180,
-  cacheRead: 0,
-  cacheWrite: 0,
-} as const;
 const OPENAI_CODEX_GPT_54_COST = {
   input: 2.5,
   output: 15,
   cacheRead: 0.25,
-  cacheWrite: 0,
-} as const;
-const OPENAI_CODEX_GPT_54_PRO_COST = {
-  input: 30,
-  output: 180,
-  cacheRead: 0,
   cacheWrite: 0,
 } as const;
 const OPENAI_CODEX_GPT_54_MINI_COST = {
@@ -94,16 +78,9 @@ const OPENAI_CODEX_GPT_54_CATALOG_SYNTH_TEMPLATE_MODEL_IDS = [
   ...OPENAI_CODEX_GPT_54_TEMPLATE_MODEL_IDS,
   OPENAI_CODEX_GPT_54_MODEL_ID,
 ] as const;
-const OPENAI_CODEX_GPT_55_PRO_TEMPLATE_MODEL_IDS = [
-  OPENAI_CODEX_GPT_54_MODEL_ID,
-  OPENAI_CODEX_GPT_54_PRO_MODEL_ID,
-  ...OPENAI_CODEX_GPT_54_TEMPLATE_MODEL_IDS,
-] as const;
 const OPENAI_CODEX_MODERN_MODEL_IDS = [
   OPENAI_CODEX_GPT_55_MODEL_ID,
-  OPENAI_CODEX_GPT_55_PRO_MODEL_ID,
   OPENAI_CODEX_GPT_54_MODEL_ID,
-  OPENAI_CODEX_GPT_54_PRO_MODEL_ID,
   OPENAI_CODEX_GPT_54_MINI_MODEL_ID,
 ] as const;
 
@@ -198,32 +175,13 @@ function resolveCodexForwardCompatModel(ctx: ProviderResolveDynamicModelContext)
 
   let templateIds: readonly string[];
   let patch: Parameters<typeof cloneFirstTemplateModel>[0]["patch"];
-  if (lower === OPENAI_CODEX_GPT_55_PRO_MODEL_ID) {
-    templateIds = OPENAI_CODEX_GPT_55_PRO_TEMPLATE_MODEL_IDS;
-    patch = {
-      contextWindow: OPENAI_CODEX_GPT_55_PRO_NATIVE_CONTEXT_TOKENS,
-      contextTokens: OPENAI_CODEX_GPT_55_PRO_DEFAULT_CONTEXT_TOKENS,
-      maxTokens: OPENAI_CODEX_GPT_54_MAX_TOKENS,
-      cost: OPENAI_CODEX_GPT_55_PRO_COST,
-    };
-  } else if (
-    lower === OPENAI_CODEX_GPT_54_MODEL_ID ||
-    lower === OPENAI_CODEX_GPT_54_LEGACY_MODEL_ID
-  ) {
+  if (lower === OPENAI_CODEX_GPT_54_MODEL_ID || lower === OPENAI_CODEX_GPT_54_LEGACY_MODEL_ID) {
     templateIds = OPENAI_CODEX_GPT_54_CATALOG_SYNTH_TEMPLATE_MODEL_IDS;
     patch = {
       contextWindow: OPENAI_CODEX_GPT_54_NATIVE_CONTEXT_TOKENS,
       contextTokens: OPENAI_CODEX_GPT_54_DEFAULT_CONTEXT_TOKENS,
       maxTokens: OPENAI_CODEX_GPT_54_MAX_TOKENS,
       cost: OPENAI_CODEX_GPT_54_COST,
-    };
-  } else if (lower === OPENAI_CODEX_GPT_54_PRO_MODEL_ID) {
-    templateIds = OPENAI_CODEX_GPT_54_CATALOG_SYNTH_TEMPLATE_MODEL_IDS;
-    patch = {
-      contextWindow: OPENAI_CODEX_GPT_54_NATIVE_CONTEXT_TOKENS,
-      contextTokens: OPENAI_CODEX_GPT_54_DEFAULT_CONTEXT_TOKENS,
-      maxTokens: OPENAI_CODEX_GPT_54_MAX_TOKENS,
-      cost: OPENAI_CODEX_GPT_54_PRO_COST,
     };
   } else if (lower === OPENAI_CODEX_GPT_54_MINI_MODEL_ID) {
     templateIds = OPENAI_CODEX_GPT_54_CATALOG_SYNTH_TEMPLATE_MODEL_IDS;
@@ -516,9 +474,7 @@ export function buildOpenAICodexProviderPlugin(): ProviderPlugin {
       const id = ctx.modelId.trim().toLowerCase();
       return [
         OPENAI_CODEX_GPT_55_MODEL_ID,
-        OPENAI_CODEX_GPT_55_PRO_MODEL_ID,
         OPENAI_CODEX_GPT_54_MODEL_ID,
-        OPENAI_CODEX_GPT_54_PRO_MODEL_ID,
         OPENAI_CODEX_GPT_54_MINI_MODEL_ID,
       ].includes(id);
     },
@@ -550,20 +506,7 @@ export function buildOpenAICodexProviderPlugin(): ProviderPlugin {
         providerId: PROVIDER_ID,
         templateIds: OPENAI_CODEX_GPT_54_CATALOG_SYNTH_TEMPLATE_MODEL_IDS,
       });
-      const gpt55ProTemplate = findCatalogTemplate({
-        entries: ctx.entries,
-        providerId: PROVIDER_ID,
-        templateIds: OPENAI_CODEX_GPT_55_PRO_TEMPLATE_MODEL_IDS,
-      });
       return [
-        buildOpenAISyntheticCatalogEntry(gpt55ProTemplate, {
-          id: OPENAI_CODEX_GPT_55_PRO_MODEL_ID,
-          reasoning: true,
-          input: ["text", "image"],
-          contextWindow: OPENAI_CODEX_GPT_55_PRO_NATIVE_CONTEXT_TOKENS,
-          contextTokens: OPENAI_CODEX_GPT_55_PRO_DEFAULT_CONTEXT_TOKENS,
-          cost: OPENAI_CODEX_GPT_55_PRO_COST,
-        }),
         buildOpenAISyntheticCatalogEntry(gpt54Template, {
           id: OPENAI_CODEX_GPT_54_MODEL_ID,
           reasoning: true,
@@ -571,14 +514,6 @@ export function buildOpenAICodexProviderPlugin(): ProviderPlugin {
           contextWindow: OPENAI_CODEX_GPT_54_NATIVE_CONTEXT_TOKENS,
           contextTokens: OPENAI_CODEX_GPT_54_DEFAULT_CONTEXT_TOKENS,
           cost: OPENAI_CODEX_GPT_54_COST,
-        }),
-        buildOpenAISyntheticCatalogEntry(gpt54Template, {
-          id: OPENAI_CODEX_GPT_54_PRO_MODEL_ID,
-          reasoning: true,
-          input: ["text", "image"],
-          contextWindow: OPENAI_CODEX_GPT_54_NATIVE_CONTEXT_TOKENS,
-          contextTokens: OPENAI_CODEX_GPT_54_DEFAULT_CONTEXT_TOKENS,
-          cost: OPENAI_CODEX_GPT_54_PRO_COST,
         }),
         buildOpenAISyntheticCatalogEntry(gpt54Template, {
           id: OPENAI_CODEX_GPT_54_MINI_MODEL_ID,

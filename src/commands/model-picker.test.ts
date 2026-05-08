@@ -529,8 +529,8 @@ describe("promptDefaultModel", () => {
       },
       {
         provider: "openai-codex",
-        id: "gpt-5.5-pro",
-        name: "GPT-5.5 Pro",
+        id: "gpt-5.4-mini",
+        name: "GPT-5.4 Mini",
       },
     ]);
     const select = vi
@@ -538,7 +538,7 @@ describe("promptDefaultModel", () => {
       .mockResolvedValueOnce("__browse__")
       .mockImplementationOnce(async (params) => {
         const option = params.options.find(
-          (entry: { value: string }) => entry.value === "openai-codex/gpt-5.5-pro",
+          (entry: { value: string }) => entry.value === "openai-codex/gpt-5.4-mini",
         );
         return option?.value ?? params.initialValue;
       });
@@ -561,7 +561,7 @@ describe("promptDefaultModel", () => {
       browseCatalogOnDemand: true,
     });
 
-    expect(result.model).toBe("openai-codex/gpt-5.5-pro");
+    expect(result.model).toBe("openai-codex/gpt-5.4-mini");
     expect(loadModelCatalog).toHaveBeenCalledOnce();
     expect(select).toHaveBeenCalledTimes(2);
     expect(select.mock.calls[1]?.[0]?.searchable).toBe(true);

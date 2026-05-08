@@ -244,10 +244,11 @@ Choose your preferred auth method and follow the setup steps.
     | `openai-codex/gpt-5.5` | repaired by doctor | Legacy route rewritten to `openai/gpt-5.5` | Existing `openai-codex` profile |
 
     <Warning>
-    Do not configure older `openai-codex/gpt-5.1*`, `openai-codex/gpt-5.2*`, or
-    `openai-codex/gpt-5.3*` model refs. ChatGPT/Codex OAuth accounts now reject
-    those models. Use `openai/gpt-5.5`; OpenAI agent turns now select the Codex
-    runtime by default.
+    Do not configure older `openai-codex/gpt-5.1*`, `openai-codex/gpt-5.2*`,
+    `openai-codex/gpt-5.3*`, `openai-codex/gpt-5.4-pro`, or
+    `openai-codex/gpt-5.5-pro` model refs. ChatGPT/Codex OAuth accounts now
+    reject those models. Use `openai/gpt-5.5`; OpenAI agent turns now select the
+    Codex runtime by default.
     </Warning>
 
     <Note>
